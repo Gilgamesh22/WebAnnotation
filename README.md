@@ -1,7 +1,7 @@
 # WebAnnotation
 Annotate the web 
 
-#Starting
+# Starting
 
 ```
 npm start
