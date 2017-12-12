@@ -4,21 +4,22 @@ angular.module('App')
   $stateProvider
   .state('Wiki', {
     url: "/Wiki",
-    template: '<iframe src="views/wiki.html" sandbox="allow-top-navigation allow-scripts allow-forms" data-ng-init="iframeInit()" id="annotatable"></iframe>',
-    data:{},
+    templateUrl: "/views/Wiki.html",
     controller: "IframeUpdate"
   })
   .state('BBC', {
     url: "/BBC",
-    template: '<iframe src="views/BBC.html" sandbox="allow-top-navigation allow-scripts allow-forms"  data-ng-init="iframeInit()" id="annotatable"></iframe>',
-    data:{},
+    templateUrl: '/views/bbc.html',
     controller: "IframeUpdate"
   }).state('adrianmejia', {
     url: "/adrianmejia",
-    templateUrl: "views/adrianmejia.html",
-    data:{},
+    templateUrl: '/views/adrianmejia.html',
     controller: "IframeUpdate"
-  });;
+  }).state('TheVerge', {
+    url: "/TheVerge",
+    templateUrl: "/views/TheVerge.html",
+    controller: "IframeUpdate"
+  });
 
   //$urlRouterProvider.otherwise('/Wiki');
 });

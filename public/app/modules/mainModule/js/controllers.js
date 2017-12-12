@@ -1,9 +1,12 @@
 validSelection = null;
 
 angular.module('App')
-.controller('NavItemController',['$scope', 'NavItems',  function($scope, NavItems) {
+.controller('NavItemController',['$scope', 'NavItems', function($scope, NavItems, Selection) {
   $scope.navItems = NavItems;
-
+}])
+.controller('Annotate',['$scope', 'Selection', function($scope, Selection) {
+  $scope.color = "#aaf442";
+  $scope.annotationText = "";
   $scope.Annotate = function() {
     highlightRange = function (range, color) {
       var newNode = document.createElement("div");
@@ -11,47 +14,25 @@ angular.module('App')
          "style",
          "background-color: " + color + "; display: inline;"
       );
-      range.surroundContents(newNode);
+      try{
+        range.surroundContents(newNode);
+      } catch(error) {
+        alert(error);
+      };
+    };
+
+    if (Selection.selected) {
+      highlightRange(Selection.selected.getRangeAt(0), $scope.color);
     }
-
-    if (validSelection) {
-      var userSelection = validSelection.getRangeAt(0);
-      $('#myModal').modal('show')
-    }
-    else
-    {
-
-    }
-  }
-
-}])
-.controller('IframeUpdate', ['$scope', function($scope){
-
-
-
-  annotatable = document.getElementById('annotatable');
-
-  annotatable.onmouseup = annotatable.onkeyup = annotatable.onselectionchange = function() {
-    function Annotatable (element) {
-      if (element.id == "annotatable") {
-        return true;
-      }
-      else if(element.localName =="body") {
-        return false;
-      }
-      Annotatable(element.parentNode);
-    }
-
-    //isValid = window.getSelection && Annotatable(document.activeElement)
-    //if (isValid)
-    //{
-      validSelection = window.getSelection()
-    //}
-//else
-    //{
-    //  validSelection = null
-   // }
   };
+}])
+.controller('IframeUpdate', ['$scope', 'Selection', function($scope, Selection){
+
+  annotatable = $('#website');
+  annotatable.on('mouseup mouseup', function() {
+    Selection.selected = window.getSelection();
+  });
+
 }])
 ;
 

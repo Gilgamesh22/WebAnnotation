@@ -49,41 +49,69 @@
       </div>
       <form class="form-inline my-2 my-lg-0">
         <!-- <input class="form-control mr-sm-2" type="text" placeholder="Search"> -->
-        <button class="btn btn-outline-success my-2 my-sm-0" type="button" ng-click="Annotate()" data-target="#myModal">Annotate</button>
+        <button class="btn btn-outline-success my-2 my-sm-0" type="button" data-toggle="modal" data-target="#addAnnotation">Annotate</button>
       </form>
     </nav>
 
-    <div class="modal fade" id="myModal" role="dialog">
-        <div class="modal-dialog">
+    <div class="modal fade" id="addAnnotation" role="dialog" ng-controller="Annotate">
+      <div class="modal-dialog">
 
-          <!-- Modal content-->
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
-              <h4 class="modal-title">Annotate</h4>
-            </div>
-            <div class="modal-body">
-              <p>Comment.</p>
-              <textarea class="form-control" rows="5" id="comment"></textarea>
-              <div id="cp" class="input-group colorpicker-component">
-                <input type="text" class="form-control input-lg" value="rgba(248, 235, 72)"/>
-                <span class="input-group-addon"><i></i></span>
-              </div>
-
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Apply</button>
-            </div>
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Annotate</h4>
           </div>
+          <div class="modal-body">
+            <p>Comment.</p>
+            <textarea class="form-control" rows="5" id="comment" value="{{annotationText}}"></textarea>
+            <div id="cp" class="input-group colorpicker-component" data-colorpicker-id="11">
+              <input type="text" class="form-control input-lg" value="{{color}}"/>
+              <span class="input-group-addon"><i></i></span>
+            </div>
 
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" ng-click="Annotate()" data-dismiss="modal">Apply</button>
+          </div>
         </div>
-      </div>
 
-  <ui-view id='annotatable' class="second-row ng-scope"></ui-view>
+      </div>
+    </div>
+
+    <div class="modal fade" id="editAnnotation" role="dialog" ng-controller="EditAnnotation">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Annotate</h4>
+          </div>
+          <div class="modal-body">
+            <p>Comment.</p>
+            <textarea class="form-control" rows="5" id="comment" value="{{annotationText}}"></textarea>
+            <div id="cp" class="input-group colorpicker-component" data-colorpicker-id="11">
+              <input type="text" class="form-control input-lg" value="{{color}}"/>
+              <span class="input-group-addon"><i></i></span>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" ng-click="DeleteNode()" data-dismiss="modal">Delete</button>
+            <button type="button" class="btn btn-default" ng-click="UpdateAnnotate()" data-dismiss="modal">Apply</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  <ui-view id="website"></ui-view>
   <script>
     $(function () {
       $('#cp').colorpicker({
-        useAlpha: false
+        color: '#aaf442',
+        format: 'hex'
       });
     });
   </script>
