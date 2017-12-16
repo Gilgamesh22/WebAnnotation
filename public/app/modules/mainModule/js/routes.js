@@ -21,6 +21,6 @@ angular.module('App')
     controller: "IframeUpdate"
   });
 
-  //$urlRouterProvider.otherwise('/Wiki');
+  $urlRouterProvider.otherwise('/Wiki');
 });
 

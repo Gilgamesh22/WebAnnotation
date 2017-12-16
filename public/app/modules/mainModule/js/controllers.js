@@ -11,13 +11,15 @@ angular.module('App')
     $('#addAnnotation').modal();
   })
 }])
-.controller('Annotate',['$scope', 'Annotation', function($scope, Annotation) {
+.controller('Annotate',['$scope', 'Annotation', 'Selection', function($scope, Annotation, Selection) {
   $scope.color = "#aaf442";
   $scope.clearAnnotationText = true;
 
   $("#addAnnotation").on('show.bs.modal', function () {
     if ($scope.clearAnnotationText) {
-      $scope.annotationText = "";
+      $scope.$apply(function() {
+        $scope.annotationText = "";
+      });
     }
   });
 
@@ -29,34 +31,36 @@ angular.module('App')
       $scope.annotationText = newValue;
   }, true);
 
-  var AddAnnotation = function(){
-    Annotation.Add($scope.annotationText, $scope.color, function(uuid, data){
-      $('#AnnotationDeleteBtn').css("visibility", "visible");
-      $('#AnnotationUpdateBtn').css("visibility", "visible");
-      $('#AnnotationAddBtn').css("visibility", "collapse");
+  var AnnotationClickCallback = function(uuid, data){
+    $('#AnnotationDeleteBtn').css("visibility", "visible");
+    $('#AnnotationUpdateBtn').css("visibility", "visible");
+    $('#AnnotationAddBtn').css("visibility", "collapse");
 
-      $scope.$apply(function() {
-        $scope.color = data.color;
-        $scope.annotationText = data.test;
-        $scope.uuid = uuid;
-        $scope.clearAnnotationText = false;
-      });
-      $('#addAnnotation').modal();
-      $scope.clearAnnotationText = true;
+    $scope.$apply(function() {
+      $scope.color = data.color;
+      $('#cp').colorpicker('setValue', data.color);
+      $scope.annotationText = data.test;
+      $scope.uuid = uuid;
+      $scope.clearAnnotationText = false;
     });
+    $('#addAnnotation').modal();
+    $scope.clearAnnotationText = true;
   };
-  $scope.Add = AddAnnotation;
+
+  $scope.Add = function() {
+    Annotation.add($scope.annotationText, $scope.color, Selection.getRange(), AnnotationClickCallback);
+  };
 
   var DeleteAnnotation = function(){
-    Annotation.Remove($scope.uuid);
+    Annotation.remove($scope.uuid);
     $('#'+ $scope.uuid).replaceWith(document.createTextNode($('#'+ $scope.uuid).html()));
   };
 
   $scope.Delete = DeleteAnnotation;
 
   $scope.Update = function(){
-    DeleteAnnotation();
-    AddAnnotation();
+    Annotation.update($scope.uuid, $scope.color, $scope.annotationText);
+    $('#' + $scope.uuid).css("background-color", $scope.color);
   };
 
 }])

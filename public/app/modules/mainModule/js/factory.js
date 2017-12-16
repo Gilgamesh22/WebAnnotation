@@ -1,13 +1,12 @@
 angular.module('App')
-.factory('NavItems', function(){
+.factory('NavItems', function() {
   return [
     {name :"Wiki", selected: true},
     {name :"BBC", selected: false},
     {name :"adrianmejia", selected: false},
     {name :"TheVerge", selected: false}
-  ]
-})
-.factory('Selection', function(){
+  ];})
+.factory('Selection', function() {
   selected = null;
   range = null
   var SetSelected = function(selected){
@@ -17,7 +16,6 @@ angular.module('App')
     } else {
       this.range = null;
     }
-
   }
   var GetSelected = function() {
     return this.selected;
@@ -29,10 +27,8 @@ angular.module('App')
     setSelected: SetSelected,
     getSelected: GetSelected,
     getRange: GetRange
-  };
-})
-.factory('GenerateID', function()
-{
+  };})
+.factory('GenerateID', function() {
   uuidv4 = function() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -40,15 +36,14 @@ angular.module('App')
     });
   };
   return {
-    GenUUID: uuidv4
-  };
-})
-.factory('Annotation', ['Selection', 'GenerateID', function(Selection, GenerateID){
-  selected = {};
+    createUuid: uuidv4
+  };})
+.factory('Annotation', ['GenerateID', function(GenerateID){
 
-  var add = function(test, color, onClickCallback) {
+  var selected = {};
+
+  var Add = function(test, color, selectionRange, onClickCallback) {
     highlightRange = function (uuid, range, color) {
-
       var newNode = document.createElement("div");
       newNode.setAttribute("style", "background-color: " + color + "; display: inline;");
       newNode.setAttribute("id", uuid);
@@ -66,21 +61,25 @@ angular.module('App')
       };
     };
 
-    if (Selection.getSelected()) {
-      uuid = GenerateID.GenUUID();
-      highlightRange(uuid, Selection.getRange(), color);
-      selected[uuid] = {test: test, color: color, range: Selection.getRange()};
+    if (selectionRange) {
+      uuid = GenerateID.createUuid();
+      highlightRange(uuid, selectionRange, color);
+      selected[uuid] = {test: test, color: color, range: selectionRange};
     }
   };
 
-  var remove = function(uuid){
+  var Remove = function(uuid){
     delete selected[uuid];
+  };
+
+  var Update = function(uuid, color, text){
+    selected[uuid].color = color;
+    selected[uuid].text = text;
   };
 
 
   return {
-    Add: add,
-    Remove:  remove
-  };
-}])
-;
+    add: Add,
+    remove: Remove,
+    update: Update
+  };}]);
