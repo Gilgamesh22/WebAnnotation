@@ -48,11 +48,11 @@ angular.module('App')
       newNode.setAttribute("style", "background-color: " + color + "; display: inline;");
       newNode.setAttribute("id", uuid);
 
-      newNode.onclick = function(event) {
+      newNode.addEventListener('click', function(event) {
         if (onClickCallback) {
           onClickCallback(uuid, selected[this.id]);
         }
-      };
+      }, true);
 
       try{
         range.surroundContents(newNode);
