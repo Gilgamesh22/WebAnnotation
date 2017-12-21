@@ -1,6 +1,15 @@
 validSelection = null;
 
 angular.module('App')
+.controller('MainController', ['$scope', 'SessionID', function(sessionID){
+  $scope.init = function () {
+    var socket = io.connect(location.origin);
+    sessionID.setSocket(socket);
+    socket.on('connectionID', function (data) {
+      sessionID.setID(data);
+    });
+  }
+}])
 .controller('NavItemController',['$scope', 'NavItems', function($scope, NavItems) {
   $scope.navItems = NavItems;
 
@@ -14,6 +23,12 @@ angular.module('App')
 .controller('Annotate',['$scope', 'Annotation', 'Selection', function($scope, Annotation, Selection) {
   $scope.color = "#aaf442";
   $scope.clearAnnotationText = true;
+  var socket = Selection.getSocket();
+  socket.emit('join', {page: $location});
+  socket.on('init', function(data){
+    Annotation.setSelected(data);
+  });
+
 
   $("#addAnnotation").on('show.bs.modal', function () {
     if ($scope.clearAnnotationText) {

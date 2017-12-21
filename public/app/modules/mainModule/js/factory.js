@@ -28,17 +28,44 @@ angular.module('App')
     getSelected: GetSelected,
     getRange: GetRange
   };})
-.factory('GenerateID', function() {
-  uuidv4 = function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+.factory('SessionID', function() {
+  var id = '00000000';
+  var socket = null;
+
+  var GetID = function () {
+    return id;
+  };
+
+  var SetID = function (idVal) {
+    this.id = idVal;
+  }
+
+  var GetSocket = function () {
+    return socket;
+  };
+
+  var SetSocket = function (socketVal) {
+    this.socket = socketVal;
+  }
+
+  return {
+    getID: GetID,
+    setID: SetID,
+    getSocket: GetSocket,
+    setSocket: SetSocket
+  };
+})
+.factory('GenerateID', ['SessionID', function(SessionID) {
+  var uuidv4 = function() {
+    return SessionID.getID() + '-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
   };
   return {
     createUuid: uuidv4
-  };})
-.factory('Annotation', ['GenerateID', function(GenerateID){
+  };}])
+.factory('Annotation', ['GenerateID', 'SessionID', function(GenerateID, SessionID){
 
   var selected = {};
 
@@ -65,6 +92,8 @@ angular.module('App')
       uuid = GenerateID.createUuid();
       highlightRange(uuid, selectionRange, color);
       selected[uuid] = {test: test, color: color, range: selectionRange};
+      var socket = SessionID.getSocket();
+      socket.emit('add', {page: $location, id: uuid, data: selected[uuid]});
     }
   };
 
@@ -77,9 +106,14 @@ angular.module('App')
     selected[uuid].text = text;
   };
 
+  var SetSelected = function(values) {
+    selected = values;
+  }
+
 
   return {
     add: Add,
     remove: Remove,
-    update: Update
+    update: Update,
+    setSelected: SetSelected
   };}]);
