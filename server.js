@@ -9,7 +9,7 @@ var methodOverride = require('method-override');
 var favicon = require('serve-favicon');
 var cors = require('cors');
 var logger = require('morgan');
-var server = require('http').Server(app);
+var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var shortid = require('shortid');
 // configuration ===========================================
@@ -60,8 +60,8 @@ var pages = {}
 
 io.on('connection', function (socket) {
 
-  var id = shortid.generate()
-  while (clientIDs.find(id)) {
+  var id = shortid.generate();
+  while (clientIDs.indexOf(id) > -1) {
     id = shortid.generate();
   }
   clientIDs.push(id);
@@ -69,6 +69,9 @@ io.on('connection', function (socket) {
   socket.on('join', function(data){
     socket.leaveAll();
     socket.join(data.page);
+    if (!(data.page in pages)) {
+      pages[data.page] = {};
+    }
     socket.emit('init', pages[data.page]);
   });
   socket.on('add', function (data) {
