@@ -19,9 +19,10 @@
         href="libs/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css">
 
   <!-- JS -->
-  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+  <script src="libs/jquery/dist/jquery.min.js"></script>
   <script src="libs/angular/angular.js"></script>
   <script src="libs/angular-ui-router/release/angular-ui-router.js"></script>
+  <script src="libs/socket.io-client/dist/socket.io.js"></script>
 
   <script src="libs/tether/dist/js/tether.min.js"></script>
   <script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -32,7 +33,7 @@
   <script src="app/modules/mainModule/js/factory.js"></script>
   <script src="app/modules/mainModule/js/controllers.js"></script>
 </head>
-<body ng-app="App" id="unannotatable">
+<body ng-app="App" id="unannotatable" ng-controller="MainController" ng-init="init()">
 
   <nav class="navbar sticky-top navbar-toggleable-md navbar-light bg-faded" ng-controller="NavItemController">
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

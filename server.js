@@ -9,7 +9,9 @@ var methodOverride = require('method-override');
 var favicon = require('serve-favicon');
 var cors = require('cors');
 var logger = require('morgan');
-
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+var shortid = require('shortid');
 // configuration ===========================================
 
 // set our port
@@ -53,6 +55,45 @@ app.use(express.static(__dirname + '/public'));
 
 
 // routes ==================================================
+var clientIDs = []
+var pages = {}
+
+io.on('connection', function (socket) {
+
+  var id = shortid.generate();
+  while (clientIDs.indexOf(id) > -1) {
+    id = shortid.generate();
+  }
+  clientIDs.push(id);
+  socket.emit('connectionID', { sesstionID: id});
+  socket.on('join', function(data){
+    socket.leaveAll();
+    socket.join(data.page);
+    if (!(data.page in pages)) {
+      pages[data.page] = {};
+    }
+    socket.emit('init', pages[data.page]);
+  });
+  socket.on('add', function (data) {
+    if (!(data.page in pages)) {
+      pages[data.page] = {};
+    }
+    pages[data.page][data.id] = data.data;
+    socket.to(data.page).emit('add', data);
+  });
+  socket.on('remove', function (data) {
+    if (data.page in pages && data.id in pages[data.page]) {
+      delete pages[data.page][data.id];
+    }
+    socket.to(data.page).emit('remove', data.id);
+  });
+  socket.on('update', function (data) {
+    if (data.page in pages && data.id in pages[data.page]) {
+      pages[data.page][data.id] = data.data;
+    }
+    socket.to(data.page).emit('update', data);
+  });
+});
 
 app.use('/', require('./app/routes')); // configure our routes
 
@@ -64,9 +105,9 @@ app.use('*', function(req, res) {
 // start app ===============================================
 // startup our app at http://localhost:8080
 
-app.listen(port);
+server.listen(port);
 
-// shoutout to the user
+// shoutout to the use r
 console.log(`it's alive port ` + port);
 
 // expose app
