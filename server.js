@@ -65,7 +65,7 @@ io.on('connection', function (socket) {
     id = shortid.generate();
   }
   clientIDs.push(id);
-  socket.emit('connectionID', { ID: id});
+  socket.emit('connectionID', { sesstionID: id});
   socket.on('join', function(data){
     socket.leaveAll();
     socket.join(data.page);

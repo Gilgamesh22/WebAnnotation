@@ -6,8 +6,12 @@ angular.module('App')
     {name :"adrianmejia", selected: false},
     {name :"TheVerge", selected: false}
   ];})
+
+
+//the current selected region.
 .factory('Selection', function() {
   selected = null;
+  selectedID = null;
   range = null
   var SetSelected = function(selected){
     this.selected = selected;
@@ -23,11 +27,54 @@ angular.module('App')
   var GetRange = function() {
     return this.range;
   }
+
+  var GetSelectedID = function() {
+    return this.selectedID;
+  }
+  var SetSelectedID = function(value) {
+    this.selectedID = value;
+  }
+
   return {
     setSelected: SetSelected,
     getSelected: GetSelected,
+    setSelectedID: SetSelectedID,
+    getSelectedID: GetSelectedID,
     getRange: GetRange
   };})
+
+//BuildRange converts the shared information to a javascript range.
+.factory('BuildRange', function() {
+  return {
+    buildRange: function (startOffset, endOffset, nodeData, nodeHTML, nodeTagName){
+    var cDoc = document.getElementById('website');
+    var tagList = cDoc.getElementsByTagName(nodeTagName);
+
+    // find the parent element with the same innerHTML
+    for (var i = 0; i < tagList.length; i++) {
+        if (tagList[i].innerHTML == nodeHTML) {
+            var foundEle = tagList[i];
+        }
+    }
+
+    // find the node within the element by comparing node data
+    var nodeList = foundEle.childNodes;
+    for (var i = 0; i < nodeList.length; i++) {
+        if (nodeList[i].data == nodeData) {
+            var foundNode = nodeList[i];
+        }
+    }
+
+    // create the range
+    var range = document.createRange();
+
+    range.setStart(foundNode, startOffset);
+    range.setEnd(foundNode, endOffset);
+    return range;
+  }
+};})
+
+//server session information
 .factory('SessionID', function() {
   var id = '00000000';
   var socket = null;
@@ -37,15 +84,15 @@ angular.module('App')
   };
 
   var SetID = function (idVal) {
-    this.id = idVal;
+    id = idVal;
   }
 
   var GetSocket = function () {
-    return this.socket;
+    return socket;
   };
 
   var SetSocket = function (socketVal) {
-    this.socket = socketVal;
+    socket = socketVal;
   };
 
   return {
@@ -55,6 +102,9 @@ angular.module('App')
     setSocket: SetSocket
   };
 })
+
+
+//generate UUID
 .factory('GenerateID', ['SessionID', function(SessionID) {
   var uuidv4 = function() {
     return SessionID.getID() + '-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -65,6 +115,7 @@ angular.module('App')
   return {
     createUuid: uuidv4
   };}])
+
 .factory('Annotation', ['GenerateID', 'SessionID', function(GenerateID, SessionID) {
 
   var HighlightRange = function (uuid, range, color, onClickCallback) {
@@ -74,7 +125,7 @@ angular.module('App')
 
     newNode.addEventListener('click', function(event) {
       if (onClickCallback) {
-        onClickCallback(uuid, selected[this.id]);
+        onClickCallback(selected[this.id]);
       }
     }, true);
 
@@ -92,7 +143,7 @@ angular.module('App')
         uuid = GenerateID.createUuid();
         var transmit = true;
       }
-      selected[uuid] = {text: text, color: color};
+      selected[uuid] = {uuid: uuid, text: text, color: color};
       selected[uuid]["range"] = selectionRange;
       var saveNode = selectionRange.startContainer;
       selected[uuid]["startOffset"] = selectionRange.startOffset;  // where the range starts
@@ -135,22 +186,3 @@ angular.module('App')
     getDataFromUuid: dataFromUuid
   };
 }]);
-/*
-function ObjtoJSON(obj) {
-  var jsonString = "{";
-  for (var key in obj) {
-    if (key == "__proto__") {
-      continue;
-    }
-
-    if (typeof obj[key] == 'object') {
-      var value = ObjtoJSON(obj[key]);
-    } else {
-      var value = obj[key];
-    }
-    jsonString += '"' + key +'":"'+  value + '",';
-  }
-  jsonString[jsonString.length - 1 ] = '}';
-  jsonString += "}";
-  return jsonString;
-}*/

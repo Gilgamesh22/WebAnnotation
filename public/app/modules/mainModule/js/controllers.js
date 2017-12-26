@@ -4,10 +4,11 @@ angular.module('App')
     var socket = io.connect(location.href);
     sessionID.setSocket(socket);
     socket.on('connectionID', function (data) {
-      sessionID.setID(data);
+      sessionID.setID(data.sesstionID);
     });
   };
 }])
+
 .controller('NavItemController',['$scope', 'NavItems', function($scope, NavItems) {
   $scope.navItems = NavItems;
 
@@ -18,13 +19,24 @@ angular.module('App')
     $('#addAnnotation').modal();
   })
 }])
+
 .controller('Annotate',['$scope', 'Annotation', 'Selection', 'SessionID', function($scope, Annotation, Selection, SessionID) {
   $scope.color = "#aaf442";
-  $scope.clearAnnotationText = true;
-
 
   $("#addAnnotation").on('show.bs.modal', function () {
-    if ($scope.clearAnnotationText) {
+    var data = Selection.getSelectedID()
+    if (data) {
+      $('#AnnotationDeleteBtn').css("visibility", "visible");
+      $('#AnnotationUpdateBtn').css("visibility", "visible");
+      $('#AnnotationAddBtn').css("visibility", "collapse");
+
+      $scope.$apply(function() {
+        $scope.color = data.color;
+        $('#cp').colorpicker('setValue', data.color);
+        $scope.annotationText = data.text;
+        $scope.uuid = data.uuid;
+      });
+    } else {
       $scope.$apply(function() {
         $scope.annotationText = "";
       });
@@ -39,20 +51,10 @@ angular.module('App')
       $scope.annotationText = newValue;
   }, true);
 
-  var AnnotationClickCallback = function(uuid, data){
-    $('#AnnotationDeleteBtn').css("visibility", "visible");
-    $('#AnnotationUpdateBtn').css("visibility", "visible");
-    $('#AnnotationAddBtn').css("visibility", "collapse");
-
-    $scope.$apply(function() {
-      $scope.color = data.color;
-      $('#cp').colorpicker('setValue', data.color);
-      $scope.annotationText = data.text;
-      $scope.uuid = uuid;
-      $scope.clearAnnotationText = false;
-    });
+  var AnnotationClickCallback = function(data){
+    Selection.setSelectedID(data);
     $('#addAnnotation').modal();
-    $scope.clearAnnotationText = true;
+    Selection.setSelectedID(null);
   };
 
   $scope.Add = function() {
@@ -68,62 +70,26 @@ angular.module('App')
   };
 
 }])
-.controller('IframeUpdate', ['$scope', 'Selection', 'SessionID', 'Annotation', function($scope, Selection, SessionID, Annotation){
 
-  var AnnotationClickCallback = function(uuid, data){
-    $('#AnnotationDeleteBtn').css("visibility", "visible");
-    $('#AnnotationUpdateBtn').css("visibility", "visible");
-    $('#AnnotationAddBtn').css("visibility", "collapse");
+.controller('IframeUpdate', ['$scope', 'Selection', 'SessionID', 'Annotation', 'BuildRange', function($scope, Selection, SessionID, Annotation, BuildRange){
 
-    $scope.$apply(function() {
-      $scope.color = data.color;
-      $('#cp').colorpicker('setValue', data.color);
-      $scope.annotationText = data.text;
-      $scope.uuid = uuid;
-      $scope.clearAnnotationText = false;
-    });
+  var AnnotationClickCallback = function(data){
+    Selection.setSelectedID(data);
     $('#addAnnotation').modal();
-    $scope.clearAnnotationText = true;
+    Selection.setSelectedID(null);
   };
-
-  function buildRange(startOffset, endOffset, nodeData, nodeHTML, nodeTagName){
-    var cDoc = document.getElementById('website');
-    var tagList = cDoc.getElementsByTagName(nodeTagName);
-
-    // find the parent element with the same innerHTML
-    for (var i = 0; i < tagList.length; i++) {
-        if (tagList[i].innerHTML == nodeHTML) {
-            var foundEle = tagList[i];
-        }
-    }
-
-    // find the node within the element by comparing node data
-    var nodeList = foundEle.childNodes;
-    for (var i = 0; i < nodeList.length; i++) {
-        if (nodeList[i].data == nodeData) {
-            var foundNode = nodeList[i];
-        }
-    }
-
-    // create the range
-    var range = document.createRange();
-
-    range.setStart(foundNode, startOffset);
-    range.setEnd(foundNode, endOffset);
-    return range;
-  }
 
   var socket = SessionID.getSocket();
   socket.emit('join', {page: location.href});
   socket.on('init', function(values){
     Annotation.resetSelected();
     for (var item in values) {
-      Annotation.add(values[item].text, values[item].color, buildRange(values[item]["startOffset"], values[item]["endOffset"], values[item]["nodeData"], values[item]["nodeHTML"], values[item]["nodeTagName"]), AnnotationClickCallback, item);
+      Annotation.add(values[item].text, values[item].color, BuildRange.buildRange(values[item]["startOffset"], values[item]["endOffset"], values[item]["nodeData"], values[item]["nodeHTML"], values[item]["nodeTagName"]), AnnotationClickCallback, item);
     }
   });
 
   socket.on('add', function(data){
-    Annotation.add(data.data.text, data.data.color, buildRange(data.data["startOffset"], data.data["endOffset"], data.data["nodeData"], data.data["nodeHTML"], data.data["nodeTagName"]), AnnotationClickCallback, data.id);
+    Annotation.add(data.data.text, data.data.color, BuildRange.buildRange(data.data["startOffset"], data.data["endOffset"], data.data["nodeData"], data.data["nodeHTML"], data.data["nodeTagName"]), AnnotationClickCallback, data.id);
   });
 
 
@@ -135,8 +101,8 @@ angular.module('App')
     Remove(data.id);
   });
 
-  annotatable = $('#website');
-  annotatable.on('mouseup mouseup', function() {
+  annotatableSection = $('#website');
+  annotatableSection.on('mouseup mouseup', function() {
     Selection.setSelected(window.getSelection());
   });
 }])
