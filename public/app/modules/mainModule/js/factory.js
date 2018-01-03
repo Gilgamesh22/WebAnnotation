@@ -3,7 +3,7 @@ angular.module('App')
   return [
     {name :"Wiki", selected: true},
     {name :"BBC", selected: false},
-    {name :"adrianmejia", selected: false},
+    {name :"Techspot", selected: false},
     {name :"TheVerge", selected: false}
   ];})
 
@@ -57,6 +57,9 @@ angular.module('App')
         }
     }
 
+    if (!foundEle) {
+      return null;
+    }
     // find the node within the element by comparing node data
     var nodeList = foundEle.childNodes;
     for (var i = 0; i < nodeList.length; i++) {
@@ -116,7 +119,9 @@ angular.module('App')
     createUuid: uuidv4
   };}])
 
-.factory('Annotation', ['GenerateID', 'SessionID', function(GenerateID, SessionID) {
+
+  //Annotation class
+.factory('Annotation', ['GenerateID', 'SessionID', '$state', function(GenerateID, SessionID, $state) {
 
   var HighlightRange = function (uuid, range, color, onClickCallback) {
     var newNode = document.createElement("div");
@@ -153,20 +158,22 @@ angular.module('App')
       selected[uuid]["nodeTagName"] = saveNode.parentElement.tagName;
       HighlightRange(uuid, selectionRange, color, onClickCallback?onClickCallback:AnnotationClickCallback);
       if (transmit) {
-        SessionID.getSocket().emit('add', {page: location.href, id: uuid, data: selected[uuid]});
+        SessionID.getSocket().emit('add', {page: $state.current.url, id: uuid, data: selected[uuid]});
       }
     }
   };
 
   var Remove = function(uuid){
     delete selected[uuid];
-    $('#'+ $scope.uuid).replaceWith(document.createTextNode($('#'+ $scope.uuid).html()));
+    $('#'+ uuid).replaceWith(document.createTextNode($('#'+ uuid).html()));
+    SessionID.getSocket().emit('update', {page: $state.current.url, id: uuid});
   };
 
   var Update = function(uuid, color, text){
     selected[uuid].color = color;
     selected[uuid].text = text;
-    $('#' + $scope.uuid).css("background-color", $scope.color);
+    $('#' + uuid).css("background-color", color);
+    SessionID.getSocket().emit('update', {page: $state.current.url, id: uuid, data: selected[uuid]});
   };
 
   var ResetSelected = function(){

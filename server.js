@@ -65,7 +65,7 @@ io.on('connection', function (socket) {
     id = shortid.generate();
   }
   clientIDs.push(id);
-  socket.emit('connectionID', { sesstionID: id});
+  socket.emit('connectionID', { sessionID: id});
   socket.on('join', function(data){
     socket.leaveAll();
     socket.join(data.page);
@@ -107,7 +107,7 @@ app.use('*', function(req, res) {
 
 server.listen(port);
 
-// shoutout to the use r
+// shoutout to the user
 console.log(`it's alive port ` + port);
 
 // expose app
