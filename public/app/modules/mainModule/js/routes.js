@@ -11,9 +11,9 @@ angular.module('App')
     url: "/BBC",
     templateUrl: '/views/bbc.html',
     controller: "IframeUpdate"
-  }).state('adrianmejia', {
-    url: "/adrianmejia",
-    templateUrl: '/views/adrianmejia.html',
+  }).state('Techspot', {
+    url: "/techspot",
+    templateUrl: '/views/techspot.html',
     controller: "IframeUpdate"
   }).state('TheVerge', {
     url: "/TheVerge",
