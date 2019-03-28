@@ -47,35 +47,36 @@ angular.module('App')
 .factory('BuildRange', function() {
   return {
     buildRange: function (startOffset, endOffset, nodeData, nodeHTML, nodeTagName){
-    var cDoc = document.getElementById('website');
-    var tagList = cDoc.getElementsByTagName(nodeTagName);
+      var cDoc = document.getElementById('website');
+      var tagList = cDoc.getElementsByTagName(nodeTagName);
 
-    // find the parent element with the same innerHTML
-    for (var i = 0; i < tagList.length; i++) {
-        if (tagList[i].innerHTML == nodeHTML) {
-            var foundEle = tagList[i];
-        }
+      // find the parent element with the same innerHTML
+      for (var i = 0; i < tagList.length; i++) {
+          if (tagList[i].innerHTML == nodeHTML) {
+              var foundEle = tagList[i];
+          }
+      }
+
+      if (!foundEle) {
+        return null;
+      }
+      // find the node within the element by comparing node data
+      var nodeList = foundEle.childNodes;
+      for (var i = 0; i < nodeList.length; i++) {
+          if (nodeList[i].data == nodeData) {
+              var foundNode = nodeList[i];
+          }
+      }
+
+      // create the range
+      var range = document.createRange();
+
+      range.setStart(foundNode, startOffset);
+      range.setEnd(foundNode, endOffset);
+      return range;
     }
-
-    if (!foundEle) {
-      return null;
-    }
-    // find the node within the element by comparing node data
-    var nodeList = foundEle.childNodes;
-    for (var i = 0; i < nodeList.length; i++) {
-        if (nodeList[i].data == nodeData) {
-            var foundNode = nodeList[i];
-        }
-    }
-
-    // create the range
-    var range = document.createRange();
-
-    range.setStart(foundNode, startOffset);
-    range.setEnd(foundNode, endOffset);
-    return range;
-  }
-};})
+  };
+})
 
 //server session information
 .factory('SessionID', function() {
